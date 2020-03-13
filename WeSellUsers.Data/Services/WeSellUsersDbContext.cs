@@ -10,6 +10,11 @@ namespace WeSellUsers.Data.Services
 {
   public class WeSellUsersDbContext : DbContext
   {
+    public WeSellUsersDbContext() : base("WeSellUsers")
+    {
+      Database.SetInitializer(new WeSellUsersDbInitializer());
+    }
     public DbSet<User> Users { get; set; }
+
   }
 }

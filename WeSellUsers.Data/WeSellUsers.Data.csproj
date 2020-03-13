@@ -129,6 +129,7 @@
     <Compile Include="Services\IUserRepository.cs" />
     <Compile Include="Services\UserRepository.cs" />
     <Compile Include="Services\WeSellUsersDbContext.cs" />
+    <Compile Include="Services\WeSellUsersDbInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -138,6 +139,7 @@
     <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="fonts\FontAwesome.otf" />
     <None Include="packages.config" />
+    <None Include="SeedData\MOCK_DATA.csv" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\" />
