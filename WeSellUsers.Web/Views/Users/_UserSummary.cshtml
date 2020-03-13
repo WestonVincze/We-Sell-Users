@@ -1,0 +1,10 @@
+﻿@model WeSellUsers.Data.Models.User
+
+  <div class="panel panel-defauly">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Model.FirstName @Model.LastName</h3>
+      @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+      @Html.ActionLink("Details", "Details", new { id = Model.Id }) |
+      @Html.ActionLink("Delete", "Delete", new { id = Model.Id })
+    </div>
+  </div>

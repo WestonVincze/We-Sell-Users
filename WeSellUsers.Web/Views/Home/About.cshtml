@@ -1,0 +1,85 @@
+﻿@{
+  ViewBag.Title = "About The Project";
+}
+<h1>We Sell Users</h1>
+
+<hr />
+
+<h3>Who am I?</h3>
+
+<p>
+  My name is Weston Vincze and I am a full stack web developer. View the source code on my
+  <a href="https://github.com/WestonVincze/" target="_blank">GitHub</a> or view my
+  <a href="https://westonvincze.com/" target="_blank">website</a> to learn more about me and my work.
+</p>
+
+<h2>@ViewBag.Title.</h2>
+
+<h3>What is it?</h3>
+<p>
+  We Sell Users is a demo project to showcase my development skills. The core feature of this project is the "Users" page which contains a list
+  of all users within a database. On the Users page the Users can be viewed, created, edited, and deleted without ever refreshing the page.
+  This project was built from scratch within one week in order to demonstrate my ability to create a full stack application using the
+  MVC methodology.
+</p>
+<p>
+  This application is connected to a database with a single table, users. The users table has an auto-generated ID and each entry must
+  contain at least one field. The email field, if populated, must be a valid email address. The Users page allows the viewing, creating, and
+  editing of users within the database. Changes are saved automatically to minimize data loss.
+</p>
+
+<h3>How was it made?</h3>
+<p>
+  We Sell Users was built with ASP.net MVC 5, utilizes SQL and EF core for data storage, and Vue for the front end.
+  Along with the core libraries and frameworks, I used: Bootstrap 4, Sweet Alert 2 (SWAL), JQuery, Font-Awesome, and Google Fonts.
+</p>
+
+<h3>What's so great about it?</h3>
+<p>
+  We Sell Users contains the following features:
+</p>
+<ul>
+  <li>
+    <span class="font-weight-bold">Dynamic:</span> Much of the content is conditionally rendered in order to serve the appropriate content and indicators.
+    Simply clicking or tapping on a field will switch it to an editable mode. An easy to use filter makes traversing the thousands of rows much more
+    manageable.
+  </li>
+  <li>
+    <span class="font-weight-bold">Simple:</span> The design is easily digested due to its simplicity. Common icons and design techniques were used in
+    order to ensure that nearly all users have the skills required to use the many features. Using this application feels natural and seamless
+    despite the more complex functions running behind the scenes.
+  </li>
+  <li>
+    <span class="font-weight-bold">Responsive:</span> The content is responsive and optimized for all screen sizes. On mobile devices
+    the entries are stacked with three rows in order to give as much space as possible for viewing and editing users.
+  </li>
+  <li>
+    <span class="font-weight-bold">Synchronized Data:</span> All displayed data is synchronized  with the database to ensure accuracy without the need
+    of page refreshes.
+  </li>
+  <li>
+    <span class="font-weight-bold">Scalable:</span> With the separation of "Web" and "API" it would be easy to scale this application up or re-use
+    the API for other applications.
+  </li>
+</ul>
+
+<h3>How would I improve it?</h3>
+<p>
+  Aside from adding more pages to build out the web page, these are the improvements I would make:
+</p>
+<ul>
+  <li>
+    <span class="font-weight-bold">Asynchronous Methods:</span> If this application was to be used by multiple users simultaneously I would
+    further implement asynchronous functions. Currently, just as a little teaser, only the "GetAllUsers" function is asynchronous. Adding this
+    alongside parallel processing would ensure data integrity when multiple users are accessing the same data simultaneously.
+  </li>
+  <li>
+    <span class="font-weight-bold">Test Driven Environment:</span> If this application had more than one key feature I would implement a test
+    environment to ensure that all changes go through a robust process before being implemented.
+  </li>
+  <li>
+    <span class="font-weight-bold">Realism:</span> If this was a real application, I would not have opted for such a loose environment for editing
+    data. With this design, it's far too easy to accidentally delete integral data. I designed this application to highlight a dynamic and interactive
+    environment for editing and viewing data.
+  </li>
+</ul>

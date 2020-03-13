@@ -1,0 +1,449 @@
+﻿@using Newtonsoft.Json
+@model IEnumerable<WeSellUsers.Data.Models.User>
+
+@{
+  ViewBag.Title = "Index";
+}
+
+  <div id="app">
+    @Html.AntiForgeryToken()
+    <h1>Our Users</h1>
+
+    @* filter dropdown and input *@
+    <div class="filter-row row align-items-center">
+      <div class="col-md-9">
+        <div class="filter-container">
+          @* Selects a property type for the filter *@
+          <select class="form-control left-curve-select" v-model="filteredProp">
+            <option value="firstName">First Name</option>
+            <option value="lastName">Last Name</option>
+            <option value="email">Email</option>
+          </select>
+          @* user filter input*@
+          <input type="text" @@keyup.enter="filterUsers" class="form-control right-curve-input" v-model="filterText" placeholder="refine results" />
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        @* filter button *@
+        <button @@click="filterUsers" class="btn btn-info btn-sm">
+          <i class="fas fa-filter"></i>
+          Filter
+        </button>
+        @* add user button *@
+        <button @@click="addUser" class="btn btn-success btn-sm fa-pull-right" :disabled="newUser">Add User</button>
+      </div>
+    </div>
+
+    @* headings *@
+    <div class="heading-row row d-none d-md-flex align-items-center">
+      <div class="col-4">
+        <span class="heading-text font-weight-bold">
+          First Name
+        </span>
+      </div>
+      <div class="col-4">
+        <span class="heading-text font-weight-bold">
+          Last Name
+        </span>
+      </div>
+      <div class="col-4">
+        <span class="heading-text font-weight-bold">
+          Email
+        </span>
+      </div>
+    </div>
+    @* row for adding new user (always top) *@
+    <div class="row user-row align-items-center" v-if="newUser">
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">First</label>
+        <div class="prop-container">
+          <input id="new-first"
+                 type="text"
+                 :class="(!newUser.firstName ? '' : validName(newUser.firstName) ? 'is-valid ' : 'is-invalid ') + ' form-control'"
+                 v-model="newUser.firstName"
+                 placeholder="enter first name" />
+        </div>
+      </div>
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">Last</label>
+        <div class="prop-container">
+          <input id="new-last"
+                 type="text"
+                 :class="(!newUser.lastName ? '' : validName(newUser.lastName) ? 'is-valid ' : 'is-invalid ') + ' form-control'"
+                 v-model="newUser.lastName"
+                 placeholder="enter last name" />
+        </div>
+      </div>
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">Email</label>
+        <div class="prop-container">
+          <input id="new-email"
+                 type="text"
+                 :class="(!newUser.email ? '' : validEmail(newUser.email) ? 'is-valid' :'is-invalid') + ' form-control'"
+                 v-model="newUser.email"
+                 placeholder="enter email address" />
+        </div>
+      </div>
+      <div class="sticky-buttons">
+        @* create user button *@
+        <button class="btn btn-success btn-sm" @@click="createUser(newUser)">Save</button>
+      </div>
+    </div>
+    @* list of users *@
+    <div class="row user-row align-items-center" v-for="user in (filteredUsers ? filteredUsers : users)">
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">First</label>
+        @* first name edit mode *@
+        <div class="prop-container">
+          <input v-if="editId === user.id && editProp.firstName"
+                 :id="user.id + '-firstName'"
+                 :class="(!user.firstName ? '' : validName(user.firstName) ? 'is-valid ' : 'is-invalid ') + 'form-control'"
+                 @@blur="saveOnBlur('firstName', user)"
+                 @@keyup.enter="saveOnBlur('firstName', user)"
+                 type="text"
+                 v-model="user.firstName"
+                 placeholder="enter first name" />
+          @* first name text mode *@
+          <div v-else @@click="setEditProp(user.id, 'firstName')" class="text-mode-container">
+            <span class="propText">{{user.firstName}}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">Last</label>
+        @* last name edit mode *@
+        <div class="prop-container">
+          <input v-if="editId === user.id && editProp.lastName"
+                 :id="user.id + '-lastName'"
+                 :class="(!user.lastName ? '' : validName(user.lastName) ? 'is-valid' : 'is-invalid') + ' form-control'"
+                 @@blur="saveOnBlur('lastName', user)"
+                 @@keyup.enter="saveOnBlur('lastName', user)"
+                 type="text"
+                 v-model="user.lastName"
+                 placeholder="enter last name" />
+          @* last name text mode *@
+          <div v-else @@click="setEditProp(user.id, 'lastName')" class="text-mode-container">
+            <span class="propText">{{user.lastName}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 d-flex align-items-center">
+        <label class="prop-label d-md-none font-weight-bold">Email</label>
+        @* email edit mode *@
+        <div class="prop-container">
+          <input v-if="editId === user.id && editProp.email"
+                 :id="user.id + '-email'"
+                 :class="(!user.email ? '' : validEmail(user.email) ? 'is-valid' : 'is-invalid') + ' form-control'"
+                 @@blur="saveOnBlur('email', user)"
+                 @@keyup.enter="saveOnBlur('email', user)"
+                 type="text"
+                 v-model="user.email"
+                 placeholder="enter email address" />
+          @* email text mode *@
+          <div v-else @@click="setEditProp(user.id, 'email')" class="text-mode-container">
+            {{user.email}}
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky-cog">
+        @* loading indicator *@
+        <span v-if="loading && loadingId === user.id">
+          <i class="fas fa-cog spin"></i>
+        </span>
+      </div>
+      <div class="sticky-buttons">
+        @* save user button *@
+        <span v-if="editMode && editId === user.id"
+              @@click="saveUserButton()"
+              class="text-success icon-button">
+          <i class="fas fa-save"></i>
+        </span>
+        @* edit user button *@
+        <span v-else @@click="editUser(user.id)" class="text-warning icon-button">
+          <i class="fas fa-pen"></i>
+        </span>
+        @* delete user button *@
+        <span @@click="deleteUser(user.id)" class="text-danger icon-button"><i class="fas fa-times"></i></span>
+      </div>
+    </div>
+  </div>
+
+@section Scripts {
+<script type="text/javascript">
+  var users = @Html.Raw(JsonConvert.SerializeObject(Model));
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      users: users,
+      newUser: null,
+      tempUser: null,
+      editId: null,
+      editProp: {
+        'firstName': false,
+        'lastName': false,
+        'email': false
+      },
+      filteredProp: 'firstName',
+      filteredUsers: null,
+      filterText: "",
+      loading: false,
+      loadingId: null
+    },
+    methods: {
+      /// filters user list
+      filterUsers: function () {
+        this.filteredUsers = this.users.filter(u => u[this.filteredProp] && u[this.filteredProp].toLowerCase().includes(this.filterText.toLowerCase()));
+      },
+      /// retrieves index of user by id
+      getUserIndex: function (id) {
+        return this.users.findIndex(u => u.id === id);
+      },
+      /// sets tempUser to user
+      setTempUser: function (user) {
+        if (user === null) {
+          this.tempUser = null;
+        } else {
+          this.tempUser = {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
+          }
+        }
+      },
+      /// sets the property(s) to be edited and focuses on input field (UI)
+      setEditProp: function (id, prop) {
+        this.unsetEditProp('all');
+        switch (prop) { 
+          case 'all':
+            this.editId = id;
+            this.editProp.firstName = true;
+            this.editProp.lastName = true;
+            this.editProp.email = true;
+            this.$nextTick(() => {
+              $('#' + this.editId + '-firstName').focus();
+            });
+            break;
+          case 'firstName':
+            this.editId = id;
+            this.editProp.firstName = true;
+            this.$nextTick(() => {
+              $('#' + this.editId + '-firstName').focus();
+            });
+            break;
+          case 'lastName':
+            this.editId = id;
+            this.editProp.lastName = true;
+            this.$nextTick(() => {
+              $('#' + this.editId + '-lastName').focus();
+            });
+            break;
+          case 'email':
+            this.editId = id;
+            this.editProp.email = true;
+            this.$nextTick(() => {
+              $('#' + this.editId + '-email').focus();
+            });
+            break;
+          default:
+            console.error('Invalid property "' + prop + '" given to setEditProp().');
+        }
+      },
+      /// un-sets the property(s) that are being edited with input field (UI)
+      unsetEditProp: function (prop) {
+        switch (prop) {
+          case 'all':
+            this.editProp.firstName = false;
+            this.editProp.lastName = false;
+            this.editProp.email = false;
+            break;
+          case 'firstName':
+            this.editProp.firstName = false;
+            break;
+          case 'lastName':
+            this.editProp.lastName = false;
+            break;
+          case 'email':
+            this.editProp.email = false;
+            break;
+          default:
+            console.error('Invalid property "' + prop + '" given to setEditProp().');
+        }
+        // if all editProp's are false, set editId to null
+        if (!this.editMode) this.editId = null;
+      },
+      /// Enables edit mode for User (UI)
+      editUser: function (id) {
+        this.setEditProp(id, 'all');
+      },
+      /// Adds empty User to Vue (UI)
+      addUser: function () {
+        // empty state held as new user
+        this.newUser = {
+          'firstName': '',
+          'lastName': '',
+          'email': ''
+        };
+        this.$nextTick(() => {
+          $('#new-first').focus();
+        });
+      },
+      saveUserButton: function () {
+        // saves happen on blur, so we never need to explicitly call the save button
+        this.unsetEditProp('all');
+      },
+      /// Saves User on blur (focusOut)
+      saveOnBlur: function (prop, user) {
+        if (user && this.tempUser) {
+          // ensure property passes client-side validation
+          var valid = (prop === 'email') ? this.validEmail(user[prop]) : this.validName(user[prop]);
+          // attempt save if data is valid and changed
+          if (valid && this.tempUser[prop] !== user[prop]) {
+            this.saveUser(user);
+            this.setTempUser(user);
+            if (!this.editMode) this.unsetEditProp(prop);
+          } else {
+            this.users[this.getUserIndex(user.id)][prop] = this.tempUser[prop];
+            if (!this.editMode) this.unsetEditProp(prop);
+          }
+        }
+      },
+      /// Creates new User (DB)
+      createUser: function (user) {
+        $.ajax({
+          type: 'Post',
+          url: '/users/create',
+          data: {
+            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+            user: user
+          },
+          success: function (response) {
+            if (response.success) {
+              var user = {
+                'id': response.user.Id,
+                'firstName': response.user.FirstName,
+                'lastName': response.user.LastName,
+                'email': response.user.Email
+              };
+              vm.users.push(user);
+              vm.newUser = null;
+              Swal.fire({
+                icon: 'success',
+                title: 'User added!',
+                text: 'User "' + user.id + '" was successfully created.'
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Creation failed.',
+                text: response.err
+              });
+            }
+          },
+          error: function (e) {
+            console.err(e);
+          }
+        });
+      },
+      /// Saves existing User (DB)
+      saveUser: function (user) {
+        this.loading = true;
+        this.loadingId = this.editId;
+        $.ajax({
+          type: 'Post',
+          url: '/users/update',
+          data: {
+            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+            user: user
+          },
+          success: function (response) {
+            if (response.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'User saved!',
+                text: 'User "' + user.id + '" was successfully updated.'
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Update failed.',
+                text: response.err
+              });            }
+            vm.loading = false;
+            vm.loadingId = null;
+          },
+          error: function (e) {
+            vm.loading = false;
+            vm.loadingId = null;
+            console.err(e);
+          }
+        });
+      },
+      /// Deletes existing User (DB)
+      deleteUser: function (id) {
+        Swal.fire({
+          title: 'Are you sure you want to delete this user?',
+          text: 'This cannot be reverted!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete user',
+          cancelButtonText: 'No, cancel this',
+          reverseButtons: true
+        }).then((result) => {
+          if (result.value) {
+            // confirmed, delete user
+            $.ajax({
+              type: 'Get',
+              url: '/users/delete',
+              data: {
+                id: id
+              },
+              success: function (response) {
+                if (response.success) {
+                  // deletes from Vue (UI)
+                  vm.users.splice(vm.getUserIndex(id), 1);
+                  vm.errorMessage = null;
+                  Swal.fire(
+                    'Deleted',
+                    'User "' + id + '" was successfully deleted.'
+                  );
+                }
+              },
+              error: function (e) {
+                console.err(e);
+              }
+            });
+          }
+        });
+      },
+      /// validation
+      validUser: function (user) {
+        return this.validName(user.firstName) && this.validName(user.lastName) && this.validEmail(user.email);
+      },
+      validName: function (name) {
+        return name ? name.length > 1 : true;
+      },
+      validEmail: function (email) {
+        return email ? /^\w+([\.-]?\w+)*@@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email) : true;
+      }
+    },
+    computed: {
+      /// returns true if all props are being edited
+      editMode: function () {
+        return this.editProp.firstName && this.editProp.lastName && this.editProp.email;
+      }
+    },
+    watch: {
+      /// sets tempUser whenever a field enters edit mode
+      editId: function (newVal) {
+        if (newVal !== null) this.setTempUser(this.users[this.getUserIndex(newVal)])
+        else this.setTempUser(null);
+      }
+    }
+  });
+</script>
+}
